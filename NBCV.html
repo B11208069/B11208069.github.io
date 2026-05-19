@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商管知識庫 | 獨家商業案例解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-active {
+            border-bottom: 3px solid #dc2626;
+            color: #dc2626;
+            font-weight: 700;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <!-- Header & Search -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center py-4 md:py-6 gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        BW
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">商管精華知識庫</h1>
+                        <p class="text-xs text-slate-500 font-medium">基於商業周刊獨家案例解析</p>
+                    </div>
+                </div>
+                
+                <div class="w-full md:w-1/3 relative">
+                    <input type="text" id="searchInput" placeholder="搜尋企業、趨勢或關鍵字..." 
+                           class="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent rounded-full text-sm focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 outline-none transition-all">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex overflow-x-auto hide-scrollbar border-b border-slate-200" id="tabs">
+                <button data-target="resources" class="tab-btn pb-3 px-4 md:px-6 text-sm font-medium text-slate-500 hover:text-slate-800 whitespace-nowrap tab-active">
+                    <i class="fas fa-book-open mr-2"></i>精選資源庫
+                </button>
+                <button data-target="notes" class="tab-btn pb-3 px-4 md:px-6 text-sm font-medium text-slate-500 hover:text-slate-800 whitespace-nowrap">
+                    <i class="fas fa-pen-nib mr-2"></i>商管重點筆記
+                </button>
+                <button data-target="faq" class="tab-btn pb-3 px-4 md:px-6 text-sm font-medium text-slate-500 hover:text-slate-800 whitespace-nowrap">
+                    <i class="fas fa-question-circle mr-2"></i>趨勢 FAQ
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[70vh]">
+        
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-search text-3xl text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">找不到相關內容</h3>
+            <p class="text-slate-500 text-sm">請嘗試其他關鍵字，例如「零售」、「AI」或「ESG」。</p>
+        </div>
+
+        <!-- Resources Section -->
+        <section id="resources" class="content-section grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Rendered by JS -->
+        </section>
+
+        <!-- Notes Section -->
+        <section id="notes" class="content-section hidden">
+            <div class="max-w-4xl mx-auto space-y-6" id="notesContainer">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="content-section hidden">
+            <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden" id="faqContainer">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-8 text-center text-sm">
+        <p>&copy; 2026 商管精華知識庫. All rights reserved.</p>
+        <p class="mt-2 text-xs opacity-60">此網站內容百分之百從提供的 NotebookLM 知識庫（商業周刊報導）中萃取生成。</p>
+    </footer>
+
+    <script>
+        // --- 知識庫資料區 (Data from KB) ---
+        const db = {
+            resources: [
+                {
+                    tag: '零售佈局',
+                    title: '統一集團的零售霸業與物流護城河',
+                    desc: '全家與統一黑貓破天荒合作，打破獨家武器護城河。統一更砸290億買下家樂福，並終止法國品牌授權，迎戰「一人家戶」趨勢。',
+                    ep: 'Ep.138, Ep.139',
+                    icon: 'fa-store'
+                },
+                {
+                    tag: '全球擴張',
+                    title: '比亞迪與50嵐的海外突圍戰',
+                    desc: '比亞迪如何從手機廠躋身全球第五大車廠；台灣珍奶王50嵐化身KOI，以高薪儲備幹部制突圍中國品牌夾殺。',
+                    ep: 'Ep.41, Ep.75',
+                    icon: 'fa-globe'
+                },
+                {
+                    tag: '商業模式',
+                    title: 'YouTube 翻身最大影音霸主',
+                    desc: '曾經被笑賠錢貨，如今營收超過600億美元超越Netflix。面對TikTok短影音威脅，如何成功將危機轉為新流量入口。',
+                    ep: 'Ep.131',
+                    icon: 'fa-play-circle'
+                },
+                {
+                    tag: '永續發展',
+                    title: 'ESG 驅動的創新與商機',
+                    desc: '益鈞花7年拆解尿布，1300噸最臭垃圾變黃金；舜倡發螺絲廠靠低碳轉型成為國際供應鏈首選，售價溢價50%。',
+                    ep: '與永續者同行系列',
+                    icon: 'fa-leaf'
+                },
+                {
+                    tag: '百貨競爭',
+                    title: '百貨龍頭的護城河與創新',
+                    desc: '新光三越打破坪效鐵律，引進特斯拉與動漫展；南霸天漢神二度揮軍台中，以6000車位解決痛點迎戰新光、大遠百。',
+                    ep: 'Ep.105, Ep.134',
+                    icon: 'fa-building'
+                },
+                {
+                    tag: 'AI 轉型',
+                    title: 'AI 重構產業與企業組織',
+                    desc: '廣達林百里提早押注 AI 伺服器；西門子工業 AI 的數位孿生應用；簡立峰指明 AI 革命必須由老闆親自開始。',
+                    ep: 'AI創新百強 / Ep.40',
+                    icon: 'fa-robot'
+                }
+            ],
+            notes: [
+                {
+                    title: '成本分析：看懂「隱性成本」的抉擇',
+                    category: '管理會計',
+                    content: '在廣達林百里決定從筆電轉型到伺服器時，顯性成本容易計算（如設廠、空出產能），但更重要的是「隱性成本」——如果不做，等於放棄未來與大型科技巨頭（如 Facebook）做生意及轉型的可能性。商管啟示：決策時不能只看財報上的數字，機會成本往往決定企業未來。'
+                },
+                {
+                    title: '行銷與定價：避開「機會財」的殺雞取卵',
+                    category: '行銷學 / 賽局',
+                    content: '國旅在連假期間坐地喊價，雖然符合傳統經濟學的「供需法則」與「收益管理」，但犯了行銷致命錯誤：1. 破壞「價格公平感」，讓消費者感覺被趁火打劫。2. 犧牲「顧客終身價值」。真正的國際品牌在尖峰時刻做的是保護會員、建立忠誠度，而非僅賺取短期的機會財。'
+                },
+                {
+                    title: '競爭優勢：將「限制」轉化為「獨佔力」',
+                    category: '策略管理',
+                    content: '福斯商旅在台灣整體車市市佔不到1%，但在救護車、福祉車等利基市場卻高達八成。面對交車期長達18倍的劣勢，他們透過深耕小眾市場、解決使用者真正的痛點（建立深厚的使用者黏著度與口碑），成功在八成的利基市場中稱霸。'
+                },
+                {
+                    title: '市場定位：從長照看核心能力的延伸',
+                    category: '商業模式',
+                    content: '陪伴孩童的《巧連智》（巧虎）母公司倍樂生，現已是日本前三大長照機構。他們的核心能力並非買地蓋房，而是「教人的能力」。長照產業最大的競爭是人才爭奪，倍樂生將「教小孩」的知識轉化為培訓照服員的SOP，成功從搖籃賺到墳墓。'
+                }
+            ],
+            faqs: [
+                {
+                    q: '為什麼企業現在還要拚 ESG？跟獲利有什麼關係？',
+                    a: '在地緣政治與供應鏈壓力下，ESG 考驗的是企業的「抗風險體質」。例如台新新光連霸 DJSI 銀行業排名前 1%，評比不僅看環保，更看重資安、風控、普惠金融等基本功。此外，像是舜倡發螺絲廠投資低碳轉型，反而讓其產品在歐洲獲得 50% 的溢價，成為國際供應鏈首選。'
+                },
+                {
+                    q: '什麼是「地端 AI (AIPC)」？為什麼它成為新趨勢？',
+                    a: '地端 AI 指的是「不用連網的 AI」。由於雲端 AI 有隱私外洩、企業資安疑慮（例如公司禁用 ChatGPT）以及網路穩定性問題，地端 AI 允許設備（如 Lenovo Yoga）在本地直接處理資料、建立個人資料庫，保護隱私同時省下訂閱費用。'
+                },
+                {
+                    q: '台灣進入「大繼承時代」，對職場與總體經濟有何影響？',
+                    a: '台灣一年遺產規模達 1.32 兆（比冰島 GDP 還高），每天逾 500 件遺產辦理繼承。這導致了兩極化：一部分人提早財富自由，甚至「員工比老闆有錢」，傳統的加薪與獎金可能不再是有效的激勵工具，企業必須改寫職場規則。'
+                },
+                {
+                    q: '台灣三大實體零售巨頭的市占率板塊目前是如何分佈的？',
+                    a: '目前台灣超市和量販業三大巨頭市占率為：第一名全聯（含大潤發）佔 41.3%，第二名好市多佔 26.6%，第三名統一集團（含剛收購的家樂福）佔 14.9%。統一收購家樂福後，計畫終止法國品牌授權，積極迎戰「一人家戶」的微型消費趨勢。'
+                }
+            ]
+        };
+
+        // --- 渲染函數區 ---
+        
+        function renderResources(data) {
+            const container = document.getElementById('resources');
+            container.innerHTML = '';
+            if (data.length === 0) return;
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl p-6 border border-slate-200 card-hover flex flex-col h-full';
+                card.innerHTML = `
+                    <div class="w-12 h-12 bg-red-50 text-red-600 rounded-lg flex items-center justify-center text-xl mb-4">
+                        <i class="fas ${item.icon}"></i>
+                    </div>
+                    <span class="inline-block px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full mb-3 w-max">
+                        ${item.tag}
+                    </span>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 leading-snug">${item.title}</h3>
+                    <p class="text-slate-600 text-sm mb-6 flex-grow leading-relaxed">${item.desc}</p>
+                    <div class="text-xs font-semibold text-slate-400 flex items-center mt-auto border-t border-slate-100 pt-4">
+                        <i class="fas fa-headphones-alt mr-2"></i>來源：${item.ep}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderNotes(data) {
+            const container = document.getElementById('notesContainer');
+            container.innerHTML = '';
+            if (data.length === 0) return;
+
+            data.forEach(item => {
+                const note = document.createElement('div');
+                note.className = 'bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden';
+                note.innerHTML = `
+                    <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-1 rounded">
+                            ${item.category}
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-800 mb-4">${item.title}</h3>
+                    <p class="text-slate-600 leading-relaxed text-base">${item.content}</p>
+                `;
+                container.appendChild(note);
+            });
+        }
+
+        function renderFAQs(data) {
+            const container = document.getElementById('faqContainer');
+            container.innerHTML = '';
+            if (data.length === 0) return;
+
+            data.forEach((item, index) => {
+                const faq = document.createElement('div');
+                faq.className = `faq-item border-b border-slate-100 last:border-0`;
+                faq.innerHTML = `
+                    <button class="w-full text-left px-6 py-5 flex justify-between items-center focus:outline-none hover:bg-slate-50 transition-colors">
+                        <span class="font-bold text-slate-800 pr-4">${item.q}</span>
+                        <i class="fas fa-chevron-down text-slate-400 faq-icon transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer px-6 bg-slate-50/50">
+                        <p class="text-slate-600 text-sm leading-relaxed">${item.a}</p>
+                    </div>
+                `;
+                
+                // Toggle Logic
+                const btn = faq.querySelector('button');
+                btn.addEventListener('click', () => {
+                    const isActive = faq.classList.contains('active');
+                    // Close all
+                    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+                    // Open clicked if it wasn't open
+                    if (!isActive) faq.classList.add('active');
+                });
+
+                container.appendChild(faq);
+            });
+        }
+
+        // --- 核心互動邏輯區 ---
+
+        function init() {
+            renderResources(db.resources);
+            renderNotes(db.notes);
+            renderFAQs(db.faqs);
+
+            // Tab Switching
+            const tabs = document.querySelectorAll('.tab-btn');
+            const sections = document.querySelectorAll('.content-section');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update tabs UI
+                    tabs.forEach(t => t.classList.remove('tab-active'));
+                    tab.classList.add('tab-active');
+
+                    // Show related section
+                    const targetId = tab.getAttribute('data-target');
+                    sections.forEach(sec => {
+                        sec.classList.add('hidden');
+                        if (sec.id === targetId) {
+                            sec.classList.remove('hidden');
+                        }
+                    });
+                });
+            });
+
+            // Search Functionality
+            const searchInput = document.getElementById('searchInput');
+            const emptyState = document.getElementById('emptyState');
+
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                
+                const filteredResources = db.resources.filter(item => 
+                    item.title.toLowerCase().includes(query) || 
+                    item.desc.toLowerCase().includes(query) ||
+                    item.tag.toLowerCase().includes(query)
+                );
+                
+                const filteredNotes = db.notes.filter(item => 
+                    item.title.toLowerCase().includes(query) || 
+                    item.content.toLowerCase().includes(query) ||
+                    item.category.toLowerCase().includes(query)
+                );
+                
+                const filteredFaqs = db.faqs.filter(item => 
+                    item.q.toLowerCase().includes(query) || 
+                    item.a.toLowerCase().includes(query)
+                );
+
+                renderResources(filteredResources);
+                renderNotes(filteredNotes);
+                renderFAQs(filteredFaqs);
+
+                // Show/Hide Empty State based on current active tab
+                const activeTabId = document.querySelector('.tab-active').getAttribute('data-target');
+                let hasResults = false;
+                
+                if (activeTabId === 'resources' && filteredResources.length > 0) hasResults = true;
+                if (activeTabId === 'notes' && filteredNotes.length > 0) hasResults = true;
+                if (activeTabId === 'faq' && filteredFaqs.length > 0) hasResults = true;
+
+                if (!hasResults && query !== '') {
+                    emptyState.classList.remove('hidden');
+                    document.getElementById(activeTabId).classList.add('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    document.getElementById(activeTabId).classList.remove('hidden');
+                }
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
